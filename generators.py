@@ -97,13 +97,19 @@ def generate_tts(full_text, file_name):
         temp_file = f"temp_tts_{i}.mp3"
         chunk_success = False
 
-        payload = {
-            "model": "qwen3-tts",
-            "voice": "echo",
-            "input": chunk,
-            "style": "cinematic deep space documentary, dark mysterious cosmic tone, scientific storytelling, immersive and atmospheric",
-
-"instructions": """Speak in a deep, calm, and authoritative voice, like a high-end space documentary narrator. 
+        for key in API_KEYS:
+            try:
+                url = f"https://gen.pollinations.ai/audio/{urllib.parse.quote(chunk)}"
+                
+                headers = {
+                    "Accept": "audio/mpeg",
+                    "Authorization": f"Bearer {key}"
+                }
+                
+                params = {
+                    "voice": "echo",
+                    "style": "cinematic deep space documentary, dark mysterious cosmic tone, scientific storytelling, immersive and atmospheric",
+                    "instruct": """Speak in a deep, calm, and authoritative voice, like a high-end space documentary narrator. 
 Your tone should feel vast, mysterious, and intellectually captivating, as if explaining the secrets of the universe itself.
 
 Use slow pacing with intentional pauses to create suspense and awe. Emphasize key scientific terms such as 'black hole', 'event horizon', 'singularity', and 'spacetime' with subtle intensity.
@@ -115,19 +121,9 @@ Avoid sounding robotic or overly emotional. Instead, balance scientific clarity 
 Let silence and pacing enhance the scale of the universe. Each sentence should feel meaningful, as if revealing something ancient and powerful.
 
 Overall style: cinematic, intelligent, mysterious, and awe-inspiring."""
-}
-
-        for key in API_KEYS:
-            # 1. JAVÍTÁS: Hozzáadjuk a kulcsot az URL-hez (?key=...)
-            url = f"https://gen.pollinations.ai/v1/audio/speech?key={key}"
-            
-            headers = {
-                "Authorization": f"Bearer {key}",
-                "Content-Type": "application/json"
-            }
-            
-            try:
-                r = requests.post(url, headers=headers, json=payload)
+                }
+                
+                r = requests.get(url, headers=headers, params=params)
                 
                 if r.status_code == 200:
                     with open(temp_file, "wb") as f:
@@ -136,11 +132,10 @@ Overall style: cinematic, intelligent, mysterious, and awe-inspiring."""
                     chunk_success = True
                     break
                 elif r.status_code == 402:
-                    # Nincs elég kredit, próbáljuk a következő kulccsal
                     continue
                 else:
                     print(f"Hiba a {i}. chunknál (Status: {r.status_code}): {r.text}")
-                    break # Ha nem 402-es hiba, lépjünk ki a kulcs-ciklusból, hogy lássuk a hibát
+                    break
                     
             except Exception as e:
                 print(f"Kivétel a {i}. chunknál:", str(e))
