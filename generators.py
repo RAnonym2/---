@@ -99,28 +99,29 @@ def generate_tts(full_text, file_name):
 
         for key in API_KEYS:
             try:
-                url = f"https://gen.pollinations.ai/audio/{urllib.parse.quote(chunk)}"
+                url = f"https://gen.pollinations.ai/text/{urllib.parse.quote(chunk)}"
                 
                 headers = {
-                    "Accept": "audio/mpeg",
+                    "Accept": "text/plain",
                     "Authorization": f"Bearer {key}"
                 }
                 
+                system_prompt = """You are a cosmic narrator with a deep, calm, and authoritative voice. 
+Your tone should evoke the vastness and mystery of space, like a high-end documentary exploring the universe.
+
+Guidelines:
+- Speak with slow, deliberate pacing and intentional pauses to build suspense and awe
+- Emphasize scientific terms with subtle intensity and reverence
+- Create an immersive atmosphere that transports the listener through space
+- Balance scientific precision with a sense of wonder and existential depth
+- Let silence and pacing enhance the cosmic scale of the universe
+- Avoid robotic or overly emotional delivery
+- Each sentence should feel meaningful, as if unveiling ancient cosmic truths
+- Overall style: cinematic, intelligent, mysterious, and deeply awe-inspiring"""
+
                 params = {
-                    "voice": "echo",
-                    "style": "cinematic deep space documentary, dark mysterious cosmic tone, scientific storytelling, immersive and atmospheric",
-                    "instruct": """Speak in a deep, calm, and authoritative voice, like a high-end space documentary narrator. 
-Your tone should feel vast, mysterious, and intellectually captivating, as if explaining the secrets of the universe itself.
-
-Use slow pacing with intentional pauses to create suspense and awe. Emphasize key scientific terms such as 'black hole', 'event horizon', 'singularity', and 'spacetime' with subtle intensity.
-
-Your delivery should feel immersive and slightly ominous, as if the listener is drifting through space while uncovering profound cosmic truths.
-
-Avoid sounding robotic or overly emotional. Instead, balance scientific clarity with a sense of wonder and existential depth.
-
-Let silence and pacing enhance the scale of the universe. Each sentence should feel meaningful, as if revealing something ancient and powerful.
-
-Overall style: cinematic, intelligent, mysterious, and awe-inspiring."""
+                    "model": "openai-audio",
+                    "system": system_prompt
                 }
                 
                 r = requests.get(url, headers=headers, params=params)
